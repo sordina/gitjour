@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'dnssd'
 require 'set'
+require 'webrick'
 require 'gitjour/version'
 
 Thread.abort_on_exception = true
@@ -23,6 +24,8 @@ module Gitjour
             remote(*args);
           when "web"
             web(*args)
+          when "browse"
+            browse(*args)
           else
             help
         end
@@ -30,7 +33,7 @@ module Gitjour
 
       private
 			def list
-				service_list.each do |service|
+				service_list("_git._tcp").each do |service|
           puts "=== #{service.name} on #{service.host}:#{service.port} ==="
           puts "  gitjour clone #{service.name}"
           if service.description != '' && service.description !~ /^Unnamed repository/
@@ -154,10 +157,10 @@ module Gitjour
 
       class Done < RuntimeError; end
 
-      def discover(timeout=5)
+      def discover(type, timeout=5)
         waiting_thread = Thread.current
 
-        dns = DNSSD.browse "_git._tcp" do |reply|
+        dns = DNSSD.browse type do |reply|
           DNSSD.resolve reply.name, reply.type, reply.domain do |resolve_reply|
             service = GitService.new(reply.name,
                                      resolve_reply.target,
@@ -179,7 +182,7 @@ module Gitjour
       def locate_repo(name)
         found = nil
 
-        discover do |obj|
+        discover("_git._tcp") do |obj|
           if obj.name == name
             found = obj
             raise Done
@@ -189,11 +192,36 @@ module Gitjour
         return found
       end
 
-      def service_list
+      def service_list(type)
         list = Set.new
-        discover { |obj| list << obj }
+        discover(type) { |obj| list << obj }
 
         return list
+      end
+
+      def browse(*args)
+        http = WEBrick::HTTPServer.new(:Port => 9850)
+        http.mount_proc("/") do |req, res|
+          res['Content-Type'] = 'text/html'
+          res.body = <<-HTML
+<html>
+  <body>
+    <h1>Browseable Git Repositories</h1>
+    <ul>
+      #{http_services.map do |s|
+        "<li><a href='http://#{s.host}:#{s.port}'>#{s.name}</a></li>"
+      end}
+    </ul>
+  </body>
+</html>
+HTML
+        end
+        trap("INT") { http.shutdown }
+        http.start
+      end
+
+      def http_services
+        service_list("_http._tcp").select { |s| s.name =~ /-gitjour$/ }
       end
 
       def announce_git(path, name, port)
