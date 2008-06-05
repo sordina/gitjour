@@ -20,7 +20,9 @@ module Gitjour
           when "serve"
             serve(*args)
           when "remote"
-            remote(*args)
+            remote(*args);
+          when "web"
+            web(*args)
           else
             help
         end
@@ -63,9 +65,45 @@ module Gitjour
 
       def serve(path=Dir.pwd, *rest)
         path = File.expand_path(path)
-        name = rest.shift || File.basename(path)
+        name = service_name(rest.shift || File.basename(path))
         port = rest.shift || 9418
 
+        if File.exists?("#{path}/.git")
+          announce_git(path, name, port.to_i)
+        else
+          Dir["#{path}/*"].each do |dir|
+            if File.directory?(dir)
+              name = File.basename(dir)
+              announce_git(dir, name, 9418)
+            end
+          end
+        end
+
+        `git-daemon --verbose --export-all --port=#{port} --base-path=#{path} --base-path-relaxed`
+      end
+
+      def web(path=Dir.pwd, *rest)
+        path = File.expand_path(path)
+        name = service_name(rest.shift || File.basename(path))
+        port = rest.shift || 1234
+        httpd = rest.shift || "webrick"
+
+        if File.exists?("#{path}/.git")
+          announce_web(path, name, port.to_i)
+          `git-instaweb --httpd=#{httpd} --port=#{port} --browser=/dev/null`
+          trap("INT") do 
+            puts "Stopping instaweb..."
+            `git-instaweb stop`
+            exit 0
+          end
+          while true; sleep 30; end
+        else
+          $stderr.puts "You must specify a proper git project"
+          exit 1
+        end
+      end
+
+      def service_name(name)
         # If the name starts with ^, then don't apply the prefix
         if name[0] == ?^
           name = name[1..-1]
@@ -74,19 +112,7 @@ module Gitjour
           prefix = ENV["USER"] if prefix.empty?
           name   = [prefix, name].compact.join("-")
         end
-
-        if File.exists?("#{path}/.git")
-          announce_repo(path, name, port.to_i)
-        else
-          Dir["#{path}/*"].each do |dir|
-            if File.directory?(dir)
-              name = File.basename(dir)
-              announce_repo(dir, name, 9418)
-            end
-          end
-        end
-
-        `git-daemon --verbose --export-all --port=#{port} --base-path=#{path} --base-path-relaxed`
+        name
       end
 
       def help
@@ -108,6 +134,12 @@ module Gitjour
         puts "      `git config --get gitjour.prefix` or your username (preference"
         puts "      in that order). If you don't want a prefix, put a ^ on the front"
         puts "      of the name_of_project (the ^ is removed before announcing)."
+        puts
+        puts "  web <path_to_project> [<name_of_project>] [<port>] [<httpd_daemon>]"
+        puts "      Serve up the current directory via git instaweb for browsers."
+        puts "      The default port is 1234 and the httpd_daemon is defaulted to"
+        puts "      webrick. Other options are 'lighttpd' and 'apache2' (See the"
+        puts "      git-instaweb man page for more details)"
         puts
         puts "  remote <project> [<name>]"
         puts "      Add a Bonjour remote into your current repository."
@@ -164,13 +196,21 @@ module Gitjour
         return list
       end
 
-      def announce_repo(path, name, port)
+      def announce_git(path, name, port)
+        announce_repo(path, name, port, "_git._tcp")
+      end
+
+      def announce_web(path, name, port)
+        announce_repo(path, name, port, "_http._tcp")
+      end
+
+      def announce_repo(path, name, port, type)
         return unless File.exists?("#{path}/.git")
 
         tr = DNSSD::TextRecord.new
         tr['description'] = File.read("#{path}/.git/description") rescue "a git project"
 
-        DNSSD.register(name, "_git._tcp", 'local', port, tr.encode) do |rr|
+        DNSSD.register(name, type, 'local', port, tr.encode) do |rr|
           puts "Registered #{name} on port #{port}. Starting service."
         end
       end
