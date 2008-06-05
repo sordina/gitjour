@@ -87,7 +87,7 @@ module Gitjour
 
       def web(path=Dir.pwd, *rest)
         path = File.expand_path(path)
-        name = service_name(rest.shift || File.basename(path))
+        name = service_name(rest.shift || File.basename(path)) + '.git'
         port = rest.shift || 1234
         httpd = rest.shift || "webrick"
 
@@ -221,7 +221,7 @@ HTML
       end
 
       def http_services
-        service_list("_http._tcp").select { |s| s.name =~ /-gitjour$/ }
+        service_list("_http._tcp").select { |s| s.name =~ /.git$/ }
       end
 
       def announce_git(path, name, port)
