@@ -144,6 +144,13 @@ module Gitjour
         puts "      webrick. Other options are 'lighttpd' and 'apache2' (See the"
         puts "      git-instaweb man page for more details)"
         puts
+        puts "  browse [<port>] [<browser>]"
+        puts "      Browse git repositories published with the 'web' command (see"
+        puts "      above). This command takes two optional arguments: the first"
+        puts "      is the port for the local web server (default 9850), the second"
+        puts "      is the path to your web browser (see man git-web--browse for"
+        puts "      details)."
+        puts
         puts "  remote <project> [<name>]"
         puts "      Add a Bonjour remote into your current repository."
         puts "      Optionally pass name to not use pwd."
@@ -200,24 +207,85 @@ module Gitjour
       end
 
       def browse(*args)
-        http = WEBrick::HTTPServer.new(:Port => 9850)
+        port = args.shift || 9850
+        browser = args.shift
+
+        services = Set.new
+        mutex = Mutex.new
+
+        DNSSD.browse("_http._tcp") do |reply|
+          begin
+            DNSSD.resolve reply.name, reply.type, reply.domain do |resolve_reply|
+              service = GitService.new(reply.name,
+                                       resolve_reply.target,
+                                       resolve_reply.port,
+                                       resolve_reply.text_record['description'].to_s)
+
+              mutex.synchronize do
+                if services.member? service
+                  services.delete service
+                else
+                  services << service
+                end
+              end
+            end
+          rescue ArgumentError
+            # usually a jacked DNS text record
+          end
+        end
+
+        http = WEBrick::HTTPServer.new(:Port => port.to_i)
         http.mount_proc("/") do |req, res|
           res['Content-Type'] = 'text/html'
           res.body = <<-HTML
-<html>
-  <body>
-    <h1>Browseable Git Repositories</h1>
-    <ul>
-      #{http_services.map do |s|
-        "<li><a href='http://#{s.host}:#{s.port}'>#{s.name}</a></li>"
-      end}
-    </ul>
-  </body>
-</html>
-HTML
+            <html>
+              <body>
+                <head>
+                  <link rel="stylesheet" href="/style.css" type="text/css" media="screen"/>
+                </head>
+                <h1>Browseable Git Repositories</h1>
+                <ul>
+                  #{mutex.synchronize do
+                      services.map do |s|
+                        "<li><a href='http://#{s.host}:#{s.port}'>#{s.name}</a> #{s.description}</li>"
+                      end
+                    end}
+                </ul>
+              </body>
+            </html>
+          HTML
+        end
+        http.mount_proc("/style.css") do |req, res|
+          res['Content-Type'] = 'text/css'
+          res.body = <<-CSS
+            body {
+              font-family: sans-serif;
+              font-size: 12px;
+              background-color: #fff;
+            }
+
+            h1 {
+              font-size: 20px;
+              font-weight: bold;
+            }
+
+            ul {
+              border: 1px dashed #999;
+              padding: 10 10 10 20;
+              background-color: #ccc;
+            }
+          CSS
         end
         trap("INT") { http.shutdown }
-        http.start
+        t = Thread.new { http.start }
+
+        url = "http://localhost:#{port}"
+        if browser
+          `git web--browse -b '#{browser}' http://localhost:9850`
+        else
+          `git web--browse -c "instaweb.browser" http://localhost:9850`
+        end
+        t.join
       end
 
       def http_services
@@ -246,6 +314,3 @@ HTML
     end
   end
 end
-
-
-
