@@ -93,7 +93,7 @@ module Gitjour
 
         if File.exists?("#{path}/.git")
           announce_web(path, name, port.to_i)
-          `git-instaweb --httpd=#{httpd} --port=#{port} --browser=/dev/null`
+          `git-instaweb --httpd=#{httpd} --port=#{port}`
           trap("INT") do 
             puts "Stopping instaweb..."
             `git-instaweb stop`
