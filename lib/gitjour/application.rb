@@ -237,6 +237,8 @@ module Gitjour
   end
 
   class Browser
+    require "erb"
+
     def initialize(*args)
       @port = args.shift || 9850
       @browser = args.shift
@@ -267,7 +269,7 @@ module Gitjour
 
       http = WEBrick::HTTPServer.new(:Port => @port.to_i)
       http.mount_proc("/") { |req, res| index(req, res) }
-      http.mount_proc("/style.css") { |req, res| css(req, res) }
+      http.mount_proc("/style.css") { |req, res| stylesheet(req, res) }
       trap("INT") { http.shutdown }
       t = Thread.new { http.start }
 
@@ -282,28 +284,42 @@ module Gitjour
 
     def index(req, res)
       res['Content-Type'] = 'text/html'
-      res.body = <<-HTML
+      res.body = index_html.result(binding)
+    end
+
+    def index_html
+      @index_html ||= ERB.new(<<-HTML)
         <html>
           <body>
             <head>
               <link rel="stylesheet" href="/style.css" type="text/css" media="screen"/>
+              <title>Browseable Git Repositories</title>
             </head>
             <h1>Browseable Git Repositories</h1>
             <ul>
-            #{@mutex.synchronize do
-                @services.map do |s|
-                  "<li><a href='http://#{s.host}:#{s.port}'>#{s.name}</a> #{s.description}</li>"
-                end
-              end}
+            <% @mutex.synchronize do %>
+              <% @services.map do |s| %>
+                <li>
+                  <a href='http://<%= s.host %>:<%= s.port %>' target="_new">
+                    <%= s.name %>
+                  </a>
+                  <%= s.description unless s.description =~ /^Unnamed repository/ %>
+                </li>
+              <% end %>
+            <% end %>
             </ul>
           </body>
         </html>
       HTML
     end
 
-    def css(req, res)
+    def stylesheet(req, res)
       res['Content-Type'] = 'text/css'
-      res.body = <<-CSS
+      res.body = css
+    end
+
+    def css
+      @css ||= <<-CSS
         body {
           font-family: sans-serif;
           font-size: 12px;
