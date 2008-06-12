@@ -87,7 +87,7 @@ module Gitjour
 
       def web(path=Dir.pwd, *rest)
         path = File.expand_path(path)
-        name = service_name(rest.shift || File.basename(path)) + '.git'
+        name = service_name(rest.shift || File.basename(path))
         port = rest.shift || 1234
         httpd = rest.shift || "webrick"
 
@@ -211,7 +211,7 @@ module Gitjour
       end
 
       def http_services
-        service_list("_http._tcp").select { |s| s.name =~ /.git$/ }
+        service_list("_http._tcp,git")
       end
 
       def announce_git(path, name, port)
@@ -219,7 +219,7 @@ module Gitjour
       end
 
       def announce_web(path, name, port)
-        announce_repo(path, name, port, "_http._tcp")
+        announce_repo(path, name, port, "_http._tcp,git")
       end
 
       def announce_repo(path, name, port, type)
@@ -247,7 +247,7 @@ module Gitjour
     end
 
     def start
-      DNSSD.browse("_http._tcp") do |reply|
+      DNSSD.browse("_http._tcp,git") do |reply|
         begin
           DNSSD.resolve reply.name, reply.type, reply.domain do |resolve_reply|
             service = GitService.new(reply.name,
@@ -259,7 +259,7 @@ module Gitjour
               if @services.member? service
                 @services.delete service
               else
-                @services << service if service.name =~ /\.git$/
+                @services << service
               end
             end
           end
