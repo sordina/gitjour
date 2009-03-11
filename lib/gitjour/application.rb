@@ -6,29 +6,29 @@ require 'gitjour/version'
 Thread.abort_on_exception = true
 
 module Gitjour
-  GitService = Struct.new(:name, :host, :port, :description)  
+  GitService = Struct.new(:name, :host, :port, :description)
 
   class Application
 
     class << self
       def run(*args)
         case args.shift
-          when "list"
-            list
-          when "clone"
-            clone(*args)
-          when "serve"
-            serve(*args)
-          when "remote"
-            remote(*args)
-          else
-            help
+        when "list"
+          list
+        when "clone"
+          clone(*args)
+        when "serve"
+          serve(*args)
+        when "remote"
+          remote(*args)
+        else
+          help
         end
       end
 
       private
-			def list
-				service_list.each do |service|
+      def list
+        service_list.each do |service|
           puts "=== #{service.name} on #{service.host}:#{service.port} ==="
           puts "  gitjour clone #{service.name}"
           if service.description != '' && service.description !~ /^Unnamed repository/
@@ -36,7 +36,7 @@ module Gitjour
           end
           puts
         end
-			end
+      end
 
       def clone(repository_name, *rest)
         dir = rest.shift || repository_name
