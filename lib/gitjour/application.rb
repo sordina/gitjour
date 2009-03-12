@@ -15,6 +15,8 @@ module Gitjour
         case args.shift
         when "list"
           list
+        when "pull"
+          pull(*args)
         when "clone"
           clone(*args)
         when "serve"
@@ -30,12 +32,21 @@ module Gitjour
       def list
         service_list.each do |service|
           puts "=== #{service.name} on #{service.host}:#{service.port} ==="
-          puts "  gitjour clone #{service.name}"
+          puts "  gitjour (clone|pull) #{service.name}"
           if service.description != '' && service.description !~ /^Unnamed repository/
             puts "  #{service.description}"
           end
           puts
         end
+      end
+
+      def pull(repository_name, branch = "master")
+        service = locate_repo(repository_name) or
+          exit_with! "ERROR: Unable to find project named '#{repository_name}'"
+
+        puts "Connecting to #{service.host}:#{service.port}"
+
+        system "git pull git://#{service.host}:#{service.port}/ #{branch}"
       end
 
       def clone(repository_name, *rest)
@@ -46,9 +57,8 @@ module Gitjour
 
         puts "Cloning '#{repository_name}' into directory '#{dir}'..."
 
-        unless service = locate_repo(repository_name)
+        service = locate_repo(repository_name) or
           exit_with! "ERROR: Unable to find project named '#{repository_name}'"
-        end
 
         puts "Connecting to #{service.host}:#{service.port}"
 
