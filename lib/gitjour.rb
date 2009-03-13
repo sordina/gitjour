@@ -101,8 +101,8 @@ module Gitjour
       end
 
       def help
-        puts "Gitjour #{Gitjour::VERSION::STRING}"
-        puts "Serve up and use git repositories via Bonjour/DNSSD."
+        puts "Gitjour #{Gitjour::VERSION}"
+        puts "Serve up and use git repositories via ZeroConf."
         puts "\nUsage: gitjour <command> [args]"
         puts
         puts "  list"
@@ -124,7 +124,7 @@ module Gitjour
         puts "      Pull from a gitjour-served repository."
         puts
         puts "  remote <project> [<name>]"
-        puts "      Add a Bonjour remote into your current repository."
+        puts "      Add a ZeroConf remote into your current repository."
         puts "      Optionally pass name to not use pwd."
         puts
       end
@@ -183,7 +183,6 @@ module Gitjour
           puts "Registered #{name} on port #{port}. Starting service."
         end
       end
-
     end
   end
 end
