@@ -43,7 +43,7 @@ module Gitjour
 
       def pull(repository_name, branch = "master")
         service = locate_repo(repository_name) or
-          exit_with! "ERROR: Unable to find project named '#{repository_name}'"
+          abort "ERROR: Unable to find project named '#{repository_name}'"
 
         puts "Connecting to #{service.host}:#{service.port}"
 
@@ -53,13 +53,13 @@ module Gitjour
       def clone(repository_name, *rest)
         dir = rest.shift || repository_name
         if File.exists?(dir)
-          exit_with! "ERROR: Clone directory '#{dir}' already exists."
+          abort "ERROR: Clone directory '#{dir}' already exists."
         end
 
         puts "Cloning '#{repository_name}' into directory '#{dir}'..."
 
         service = locate_repo(repository_name) or
-          exit_with! "ERROR: Unable to find project named '#{repository_name}'"
+          abort "ERROR: Unable to find project named '#{repository_name}'"
 
         puts "Connecting to #{service.host}:#{service.port}"
 
@@ -127,11 +127,6 @@ module Gitjour
         puts "      Add a Bonjour remote into your current repository."
         puts "      Optionally pass name to not use pwd."
         puts
-      end
-
-      def exit_with!(message)
-        STDERR.puts message
-        exit!
       end
 
       class Done < RuntimeError; end
