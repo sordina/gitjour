@@ -1,23 +1,41 @@
 = gitjour
 
-* http://github.com/chad/gitjour
+* http://github.com/technomancy/gitjour
 
 == DESCRIPTION:
 
-Automates DNSSD-powered serving and cloning of git repositories.
-
-== FEATURES/PROBLEMS:
-
-* As needed
+Automates zeroconf-powered serving and cloning of git repositories.
 
 == SYNOPSIS:
 
-  % gitjour serve project_dir [name_to_advertise_as]
+  % gitjour serve [project_dir] [name_to_advertise_as]
+  Registered phil-gitjour on port 9418. Starting service.
+
   % gitjour list
+  Gathering for up to 5 seconds...
+  === phil-gitjour on pdp10.local.:9418 ===
+    gitjour (clone|pull) phil-gitjour
+
+  % gitjour clone phil-gitjour
+  Gathering for up to 5 seconds...
+  Connecting to pdp10.local.:9418
+  Initialized empty Git repository in /home/phil/phil-gitjour/.git/
+  [...]
+  Resolving deltas: 100% (342/342), done.
+
+  % gitjour pull phil-gitjour
+  Gathering for up to 5 seconds...
+  Connecting to pdp10.local.:9418
+  From git://pdp10.local.:9418
+   * branch            master     -> FETCH_HEAD
+  Updating 5ede61a..781bc4d
+  [...]
+  4 files changed, 35 insertions(+), 80 deletions(-)
 
 == REQUIREMENTS:
 
-* dnssd
+* dnssd, which requires development headers to bonjour or avahi
+  See dnssd documentation for details.
 
 == INSTALL:
 

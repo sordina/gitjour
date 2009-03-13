@@ -109,7 +109,7 @@ module Gitjour
         puts "      Lists available repositories."
         puts
         puts "  clone <project> [<directory>]"
-        puts "      Clone a gitjour served repository."
+        puts "      Clone a gitjour-served repository."
         puts
         puts "  serve <path_to_project> [<name_of_project>] [<port>] or"
         puts "        <path_to_projects>"
@@ -119,6 +119,9 @@ module Gitjour
         puts "      `git config --get gitjour.prefix` or your username (preference"
         puts "      in that order). If you don't want a prefix, put a ^ on the front"
         puts "      of the name_of_project (the ^ is removed before announcing)."
+        puts
+        puts "  pull <project> [<branch>]"
+        puts "      Pull from a gitjour-served repository."
         puts
         puts "  remote <project> [<name>]"
         puts "      Add a Bonjour remote into your current repository."
