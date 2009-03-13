@@ -5,7 +5,7 @@ require 'set'
 Thread.abort_on_exception = true
 
 module Gitjour
-  VERSION = "6.3.0"
+  VERSION = "6.4.0"
   GitService = Struct.new(:name, :host, :port, :description)
 
   class Application
