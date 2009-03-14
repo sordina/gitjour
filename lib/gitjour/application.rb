@@ -32,8 +32,8 @@ module Gitjour
       end
 
       private
-			def list
-				service_list("_git._tcp").each do |service|
+      def list
+        service_list("_git._tcp").each do |service|
           puts "=== #{service.name} on #{service.host}:#{service.port} ==="
           puts "  gitjour clone #{service.name}"
           if service.description != '' && service.description !~ /^Unnamed repository/
@@ -41,7 +41,7 @@ module Gitjour
           end
           puts
         end
-			end
+      end
 
       def clone(repository_name, *rest)
         dir = rest.shift || repository_name

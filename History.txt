@@ -1,3 +1,16 @@
+== 6.4.0 2009-03-13
+
+* Add pull command
+* Support git 1.6+
+* Require dnssd 0.7.1+ to support Avahi
+
+== 6.3.0 2008-08-23
+
+* Simplify project layout, remove newgem dependency
+* Add a prefix to projects' served name
+
+[...]
+
 == 0.0.1 2008-05-29
 
 * 1 major enhancement:
