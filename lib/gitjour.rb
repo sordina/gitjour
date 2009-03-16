@@ -113,26 +113,18 @@ module Gitjour
         port = rest.shift || 1234
         httpd = rest.shift || "webrick"
 
-        if File.exists?("#{path}/.git")
-          announce_web(path, name, port.to_i)
-          `git-instaweb --httpd=#{httpd} --port=#{port}`
-          if $? == 0
-            trap("INT") do 
-              puts "Stopping instaweb..."
-              `git-instaweb stop`
-              exit 0
-            end
-            while true; sleep 30; end
-          else
-            $stderr.puts "Unable to launch git-instaweb. " +
-              "You may need to symlink $PREFIX/libexec/git-core/" +
-              "git-instaweb to a location in your path"
-            exit 1
-            end
-        else
-          $stderr.puts "You must specify a proper git project"
-          exit 1
+        system("git instaweb --httpd=#{httpd} --port=#{port}") or
+          abort "Unable to launch git instaweb."
+
+        announce_web(path, name, port.to_i)
+
+        trap("INT") do 
+          puts "Stopping instaweb..."
+          system "git instaweb stop"
+          exit
         end
+
+        Thread.stop
       end
 
       def help
@@ -248,7 +240,6 @@ module Gitjour
       def announce_web(path, name, port)
         announce_repo(path, name, port, "_http._tcp,git")
       end
-
     end
   end
 end
