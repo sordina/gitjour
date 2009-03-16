@@ -118,7 +118,7 @@ module Gitjour
 
         announce_web(path, name, port.to_i)
 
-        trap("INT") do 
+        trap("INT") do
           puts "Stopping instaweb..."
           system "git instaweb stop"
           exit
@@ -214,7 +214,7 @@ module Gitjour
       end
 
       def browse(*args)
-        require "browser"        
+        require "gitjour/browser"
         Browser.new(*args).start
       end
 
