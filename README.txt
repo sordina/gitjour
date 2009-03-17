@@ -34,6 +34,7 @@ Automates zeroconf-powered serving and cloning of git repositories.
 
 == REQUIREMENTS:
 
+* git
 * dnssd, which requires development headers to bonjour or avahi
   See dnssd documentation for details.
 

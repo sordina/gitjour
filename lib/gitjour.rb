@@ -218,10 +218,6 @@ module Gitjour
         Browser.new(*args).start
       end
 
-      def announce_web(path, name, port)
-        announce_repo(path, name, port, "_http._tcp,git")
-      end
-
       def announce_repo(path, name, port, type)
         return unless File.exists?("#{path}/.git")
 
@@ -239,6 +235,9 @@ module Gitjour
 
       def announce_web(path, name, port)
         announce_repo(path, name, port, "_http._tcp,git")
+      rescue
+        # Avahi doesn't support hierarchical service types
+        announce_repo(path, name, port, "_http._tcp")
       end
     end
   end
