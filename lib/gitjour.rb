@@ -223,6 +223,7 @@ module Gitjour
 
         tr = DNSSD::TextRecord.new
         tr['description'] = File.read("#{path}/.git/description") rescue "a git project"
+        tr['gitjour'] = 'true' # distinguish instaweb from other HTTP servers
 
         DNSSD.register(name, type, 'local', port, tr.encode) do |rr|
           puts "Registered #{name} on port #{port}. Starting service."
@@ -234,9 +235,6 @@ module Gitjour
       end
 
       def announce_web(path, name, port)
-        announce_repo(path, name, port, "_http._tcp,git")
-      rescue
-        # Avahi doesn't support hierarchical service types
         announce_repo(path, name, port, "_http._tcp")
       end
     end

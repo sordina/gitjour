@@ -17,6 +17,7 @@ module Gitjour
       DNSSD.browse("_http._tcp") do |reply|
         begin
           DNSSD.resolve reply.name, reply.type, reply.domain do |resolve_reply|
+            next unless resolve_reply.text_record['gitjour']
             service = GitService.new(reply.name,
                                      resolve_reply.target,
                                      resolve_reply.port,
