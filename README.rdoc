@@ -4,18 +4,18 @@
 
 == DESCRIPTION:
 
-Automates zeroconf-powered serving and cloning of git repositories.
+Automates ZeroConf-powered serving and cloning of git repositories.
 
 == SYNOPSIS:
 
 === THE BASICS
 
-To serve a project, identified via Bonjour:
+To serve a project, identified via ZeroConf:
 
   % gitjour serve [project_dir] [name_to_advertise_as]
   Registered phil-gitjour on port 9418. Starting service.
 
-To find Bonjour-enabled git projects:
+To find advertised git projects:
 
   % gitjour list
   Gathering for up to 5 seconds...
@@ -24,7 +24,7 @@ To find Bonjour-enabled git projects:
 
 === CLONING & PULLING
 
-To clone a Bonjour-enabled git repo:
+To clone an advertised git repo:
 
   % gitjour clone phil-gitjour
   Gathering for up to 5 seconds...
@@ -34,7 +34,7 @@ To clone a Bonjour-enabled git repo:
   Resolving deltas: 100% (342/342), done.
 
 
-To pull from a Bonjour-enabled git repo:
+To pull from an advertised git repo:
 
   % gitjour pull phil-gitjour
   Gathering for up to 5 seconds...
@@ -52,9 +52,9 @@ To serve up your repo via 'git instaweb':
   % gitjour web phil-gitjour
   [2009-03-17 19:27:20] INFO  WEBrick 1.3.1
   [2009-03-17 19:27:20] INFO  ruby 1.8.6 (2008-03-03) [universal-darwin9.0]
-  # Starts git-instaweb in webrick, publishes Bonjour record
+  # Starts git-instaweb in webrick, publishes ZeroConf DNS record
 
-To see Bonjour-enabled git repos in your browser:
+To see all advertised git repos in your browser:
 
   % gitjour browse
   # Starts a small web-app to find all

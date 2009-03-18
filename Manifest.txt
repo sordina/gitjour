@@ -4,6 +4,6 @@ README.txt
 Rakefile
 bin/gitjour
 lib/gitjour.rb
-lib/browser.rb
+lib/gitjour/browser.rb
 test/test_gitjour.rb
 test/test_helper.rb

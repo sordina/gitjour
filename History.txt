@@ -1,3 +1,8 @@
+== 6.5.0 2009-03-17
+
+* Added web command to launch and announce instaweb
+* Added browse command to see all available instawebs
+
 == 6.4.0 2009-03-13
 
 * Add pull command
