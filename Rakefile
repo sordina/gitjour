@@ -10,6 +10,8 @@ Hoe.new('gitjour', Gitjour::VERSION) do |p|
   p.developer('Evan Phoenix', 'evan@fallingsnow.net')
   p.developer('Rich Kilmer', 'rich@example.com')
   p.developer('Phil Hagelberg', 'technomancy@gmail.com')
+
+  p.readme_file = 'README.rdoc'
 end
 
 # vim: syntax=Ruby

@@ -34,3 +34,4 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<hoe>, [">= 1.9.0"])
   end
 end
+
