@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'dnssd'
 require 'set'
+require 'socket'
 
 Thread.abort_on_exception = true
 
@@ -93,13 +94,18 @@ module Gitjour
         name = service_name(rest.shift || File.basename(path))
         port = rest.shift || 9418
 
+				while port_taken? port.to_i
+					$stderr.puts "Port [#{port}] taken. Trying port [#{port + 1}]."
+					port = port + 1
+				end
+
         if File.exists?("#{path}/.git")
           announce_git(path, name, port.to_i)
         else
           Dir["#{path}/*"].each do |dir|
             if File.directory?(dir)
               name = File.basename(dir)
-              announce_git(dir, name, 9418)
+              announce_git(dir, name, port)
             end
           end
         end
@@ -240,6 +246,15 @@ module Gitjour
       def announce_web(path, name, port)
         announce_repo(path, name, port, "_http._tcp")
       end
+
+			def port_taken? port
+				begin
+					TCPsocket.open("127.0.0.1", port).close
+					true
+				rescue Errno::ECONNREFUSED
+					false
+				end
+			end
     end
   end
 end
