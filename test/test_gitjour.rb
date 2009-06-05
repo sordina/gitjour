@@ -4,7 +4,7 @@ require File.dirname(__FILE__) + '/test_helper.rb'
 class TestGitjour < Test::Unit::TestCase
   def test_thread_friendly
     repo = File.dirname(__FILE__) + '/repo'
-    port = 3289
+    port = 9418
     FileUtils.rm_rf repo
     `mkdir -p #{repo}; cd #{repo}; git init`
     

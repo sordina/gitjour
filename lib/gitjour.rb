@@ -47,7 +47,7 @@ module Gitjour
       end
 
       def list
-        service_list.each do |service|
+        service_list do |service|
           puts "=== #{service.name} on #{service.host}:#{service.port} ==="
           puts "  gitjour (clone|pull) #{service.name}"
           if service.description != '' && service.description !~ /^Unnamed repository/
@@ -208,7 +208,10 @@ module Gitjour
 
       def service_list
         list = Set.new
-        discover { |obj| list << obj }
+        discover do |obj|
+					yield obj
+					list << obj
+				end
 
         return list
       end
